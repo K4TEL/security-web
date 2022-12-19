@@ -1,5 +1,7 @@
 const uuid = require('uuid');
 const express = require('express');
+const dotenv = require('dotenv');
+const jwt = require('jsonwebtoken');
 const onFinished = require('on-finished');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -7,10 +9,13 @@ const port = 3000;
 const fs = require('fs');
 
 const app = express();
+dotenv.config();
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const SESSION_KEY = 'Authorization';
+const JWT_KEY = "1337"
 
 class Session {
     #sessions = {}
@@ -56,13 +61,17 @@ class Session {
     }
 }
 
-const sessions = new Session();
+const sessions = new Session(); 
 
 app.use((req, res, next) => {
     let currentSession = {};
-    let sessionId = req.get(SESSION_KEY);
+    let jwtToken = req.get(SESSION_KEY);
+    
+    if (jwtToken) {
+        const verifiedToken = jwt.verify(jwtToken, JWT_KEY);
+        console.log(verifiedToken)
+        let sessionId = verifiedToken.sub
 
-    if (sessionId) {
         currentSession = sessions.get(sessionId);
         if (!currentSession) {
             currentSession = {};
@@ -85,9 +94,11 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-    if (req.session.username) {
+    let jwtToken = req.get(SESSION_KEY);
+    
+    if (jwtToken) {
         return res.json({
-            username: req.session.username,
+            username: jwt.verify(jwtToken, JWT_KEY).name,
             logout: 'http://localhost:3000/logout'
         })
     }
@@ -114,7 +125,7 @@ const users = [
 
 app.post('/api/login', (req, res) => {
     const { login, password } = req.body;
-
+    
     const user = users.find((user) => {
         if (user.login == login && user.password == password) {
             return true;
@@ -126,7 +137,18 @@ app.post('/api/login', (req, res) => {
         req.session.username = user.username;
         req.session.login = user.login;
 
-        res.json({ token: req.sessionId });
+        var d = new Date();
+        var calculatedExpiresIn = (((d.getTime()) + (60 * 60 * 1000)) - (d.getTime() - d.getMilliseconds()) / 1000);
+
+        let data = {
+        "sub": req.sessionId,
+        "name": user.username,
+        "iat": (d.getTime())
+        }
+    
+        const token = jwt.sign(data, JWT_KEY, { expiresIn: calculatedExpiresIn });
+
+        res.json({ token: token });
     }
 
     res.status(401).send();
