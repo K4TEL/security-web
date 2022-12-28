@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Main</title>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    </head>
+
+    <body>
+        <main id="main-holder">
+            <p id="status"></p>
+            <a href="/login" id="login-link">Login</a>
+            <a href="/signup" id="signup-link">Signup</a>
+            <a href="/logout" id="logout-link">Logout</a>
+        </main>
+       
+    </body>
+
+
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            display: grid;
+            justify-items: center;
+            align-items: center;
+            background-color: #3a3a3a;
+        }
+
+        #main-holder {
+            width: 50%;
+            height: 70%;
+            display: grid;
+            justify-items: center;
+            align-items: center;
+            background-color: white;
+            border-radius: 7px;
+            box-shadow: 0px 0px 5px 2px black;
+        }
+
+        #logout-link, #login-link, #signup-link {
+            opacity: 0;
+        }
+    </style>
+
+    <script>
+        const host ="localhost";
+        const port = 3000;
+
+        const statusField = document.getElementById("status")
+
+        const token = sessionStorage.getItem('token');
+
+        const logout = document.getElementById("logout-link");
+        const login = document.getElementById("login-link");
+        const signup = document.getElementById("signup-link");
+
+        if (token) {
+            fetch(`http://${host}:${port}/api/status`, {
+                method: "GET",
+                headers: { Authorization: token },
+            }).then(async (response) => {
+                if (response.ok) {
+                    const { status } = await response.json();
+                    statusField.innerText = status;
+                    logout.style.opacity = 1;
+                    login.style.opacity = 0;
+                    signup.style.opacity = 0;
+                } else {
+                    console.error(
+                        `Failed to fetch user status: ${await response.text()}`
+                    );
+                }
+            });
+        } else {
+            statusField.innerText = "Please, login or signup";
+            logout.style.opacity = 0;
+            login.style.opacity = 1;
+            signup.style.opacity = 1;
+        }
+    </script>
+</html>

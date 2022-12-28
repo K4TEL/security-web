@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Logout</title>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    </head>
+
+    <body>
+    </body>
+
+
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            display: grid;
+            justify-items: center;
+            align-items: center;
+            background-color: #3a3a3a;
+        }
+    </style>
+
+    <script>
+        const host ="localhost";
+        const port = 3000;
+
+        const redirectToMain = () => window.location.replace(`http://${host}:${port}/`);
+
+        const token = sessionStorage.getItem('token');
+        if (token) {
+            fetch(`http://${host}:${port}/api/logout`, {
+                method: "GET",
+                headers: { Authorization: token },
+            }).then(async (response) => {
+                if (response.ok) {
+                    sessionStorage.removeItem("token");
+                    redirectToMain();
+                } else {
+                    console.error(`Logout response: ${await response.text()}`);
+                }
+            })
+            .catch((error) => {
+                console.error(`Logout failed: ${error}`);
+            });
+        } else {
+            redirectToMain();
+        }
+    </script>
+</html>
