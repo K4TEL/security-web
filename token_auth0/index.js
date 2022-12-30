@@ -103,7 +103,7 @@ app.use(async (req, res, next) => {
             currentSession = {};
             sessionId = sessions.init();
         } else if (
-            currentSession.login && 
+            currentSession.login && currentSession.accessToken &&
             isTokenExpired(currentSession.accessToken, REFRESH_DELAY)
         ) {
             const response = await refreshUserToken(currentSession.refreshToken);
@@ -200,7 +200,7 @@ const createUser = async (login, password, accessToken) => {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
     headers.append("Authorization", `Bearer ${accessToken}`);
-    
+
     return await fetch(`https://${process.env.DOMAIN}/api/v2/users`, {
         method: "POST",
         body: bodyParams,
@@ -215,6 +215,9 @@ app.post("/api/signup", async (req, res) => {
     console.log(`App token: ${accessToken}`);
     const response = await createUser(login, password, accessToken);
     if (response.ok) {
+        req.session.login = login;
+        req.session.accessToken = accessToken;
+
         res.status(201).send({ token: req.sessionId });
     } else {
         const errorText = await response.text();
