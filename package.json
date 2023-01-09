@@ -2,6 +2,7 @@
   "dependencies": {
     "auth0": "^3.0.1",
     "awesome-typescript-loader": "^5.2.1",
+    "axios": "^1.2.2",
     "body-parser": "^1.20.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
@@ -14,6 +15,8 @@
     "node-fetch": "^3.3.0",
     "on-finished": "^2.4.1",
     "path": "^0.12.7",
+    "querystring": "^0.2.1",
+    "request": "^2.88.2",
     "source-map-loader": "^4.0.1",
     "uuid": "^9.0.0"
   }
