@@ -88,6 +88,12 @@ const refreshUserToken = async (refreshToken) => {
 };
 
 const isTokenExpired = (accessToken, minDelay = 0) => {
+    const jwt_key = process.env.JWT_KEY;
+    console.log(jwt_key);
+    const token = accessToken.split('.')[1];
+    console.log(token);
+    console.log(jwt.verify(token, jwt_key, { algorithm: 'RS256' }));
+    // const { exp } = jwt.verify(accessToken, jwt_key, { algorithm: 'RS256' });
     const { exp } = jwt.decode(accessToken);
     const now = Math.floor(Date.now() / 1e3);
     console.log({exp, now});
